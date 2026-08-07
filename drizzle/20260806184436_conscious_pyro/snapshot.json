@@ -2,9 +2,7 @@
   "version": "8",
   "dialect": "postgres",
   "id": "8fe68d3f-8455-43cc-a7d2-7f7a63042f58",
-  "prevIds": [
-    "00000000-0000-0000-0000-000000000000"
-  ],
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
       "isRlsEnabled": false,
@@ -195,9 +193,7 @@
       "table": "files"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "files_pkey",
       "schema": "public",
