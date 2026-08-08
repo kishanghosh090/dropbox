@@ -6,15 +6,21 @@ import { useSignUp } from "@clerk/nextjs";
 import { z } from "zod";
 
 import { signUpSchema } from "@/schemas/signUpSchema";
-import { useState } from "react";
+import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 
 export default function SignUpForm() {
+  const router = useRouter();
   const [verifying, setVerifying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
+  const [verificationError, seterificationError] = useState<string | null>(
+    null,
+  );
 
-  const { signUp, isLoaded } = useSignUp();
+  const { signUp, isLoaded, setActive } = useSignUp();
 
   const {
     register,
@@ -55,7 +61,41 @@ export default function SignUpForm() {
       setIsSubmitting(false);
     }
   };
-  const handleVerificationSubmit = async () => {};
+  const handleVerificationSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
+    e.preventDefault();
+    if (!isLoaded || !signUp) {
+      return;
+    }
+    setIsSubmitting(true);
+    setAuthError(null);
+
+    try {
+      const result = await signUp.attemptEmailAddressVerification({
+        code: verificationCode,
+      });
+
+      console.log(result);
+      if (result.status == "complete") {
+        await setActive({
+          session: result.createdSessionId,
+        });
+        router.replace("");
+      } else {
+        console.log("Verrification imcomplete");
+        setVerifying(false);
+        seterificationError("verification could not be complete");
+      }
+    } catch (error: any) {
+      seterificationError(
+        error.errors?.[0]?.message ||
+          "an error occured during the signup. please try again",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (verifying) {
     return <h1>this is OTP entering field</h1>;
