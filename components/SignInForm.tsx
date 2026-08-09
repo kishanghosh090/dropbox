@@ -52,6 +52,15 @@ export default function SignInForm() {
     setAuthError(null);
 
     try {
+      const result = await signIn.create({
+        identifier: data.identifier,
+        password: data.password,
+      });
+
+      if (result.status == "complete") {
+        await setActive({ session: result.createdSessionId });
+        router.replace("/dashboard");
+      }
     } catch (error: any) {
       console.error("Sign-up error:", error);
       setAuthError(
@@ -67,13 +76,11 @@ export default function SignInForm() {
     e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
-   
 
     setIsSubmitting(true);
     setVerificationError(null);
 
     try {
-     
     } catch (error: any) {
       console.error("Verification error:", error);
       setVerificationError(
@@ -133,9 +140,7 @@ export default function SignInForm() {
             <p className="text-sm text-default-500">
               Didn't receive a code?{" "}
               <button
-                onClick={async () => {
-                 
-                }}
+                onClick={async () => {}}
                 className="text-primary hover:underline font-medium"
               >
                 Resend code
@@ -198,7 +203,6 @@ export default function SignInForm() {
               className="w-full"
             />
           </div>
-
 
           <div className="space-y-4">
             <div className="flex items-start gap-2">
