@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSignUp } from "@clerk/nextjs";
+import { useSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Link from "next/link"; 
+import Link from "next/link";
 import { z } from "zod";
 import { Button, Input, Card, CardHeader, CardFooter } from "@heroui/react";
 
@@ -17,11 +17,12 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { signUpSchema } from "@/schemas/signUpSchema";
 
-export default function SignUpForm() {
+import { signInSchema } from "@/schemas/signInSchema";
+
+export default function SignInForm() {
   const router = useRouter();
-  const { signUp, isLoaded, setActive } = useSignUp();
+  const { signIn, isLoaded, setActive } = useSignIn();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
@@ -36,29 +37,21 @@ export default function SignUpForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<z.infer<typeof signUpSchema>>({
-    resolver: zodResolver(signUpSchema),
+  } = useForm<z.infer<typeof signInSchema>>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: "",
+      identifier: "",
       password: "",
-      passwordConformation: "",
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
+  const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     if (!isLoaded) return;
 
     setIsSubmitting(true);
     setAuthError(null);
 
     try {
-      await signUp.create({
-        emailAddress: data.email,
-        password: data.password,
-      });
-
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-      setVerifying(true);
     } catch (error: any) {
       console.error("Sign-up error:", error);
       setAuthError(
@@ -74,25 +67,13 @@ export default function SignUpForm() {
     e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
-    if (!isLoaded || !signUp) return;
+   
 
     setIsSubmitting(true);
     setVerificationError(null);
 
     try {
-      const result = await signUp.attemptEmailAddressVerification({
-        code: verificationCode,
-      });
-
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        router.push("/dashboard");
-      } else {
-        console.error("Verification incomplete:", result);
-        setVerificationError(
-          "Verification could not be completed. Please try again.",
-        );
-      }
+     
     } catch (error: any) {
       console.error("Verification error:", error);
       setVerificationError(
@@ -153,11 +134,7 @@ export default function SignUpForm() {
               Didn't receive a code?{" "}
               <button
                 onClick={async () => {
-                  if (signUp) {
-                    await signUp.prepareEmailAddressVerification({
-                      strategy: "email_code",
-                    });
-                  }
+                 
                 }}
                 className="text-primary hover:underline font-medium"
               >
@@ -201,7 +178,7 @@ export default function SignUpForm() {
               id="email"
               type="email"
               placeholder="your.email@example.com"
-              {...register("email")}
+              {...register("identifier")}
               className="w-full"
             />
           </div>
@@ -222,21 +199,6 @@ export default function SignUpForm() {
             />
           </div>
 
-          <div className="space-y-2">
-            <label
-              htmlFor="passwordConfirmation"
-              className="text-sm font-medium text-default-900"
-            >
-              Confirm Password
-            </label>
-            <Input
-              id="passwordConfirmation"
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="••••••••"
-              {...register("passwordConformation")}
-              className="w-full"
-            />
-          </div>
 
           <div className="space-y-4">
             <div className="flex items-start gap-2">
