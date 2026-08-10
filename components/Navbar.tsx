@@ -1,6 +1,6 @@
 "use client";
 
-import { useClerk, SignedIn, SignedOut } from "@clerk/nextjs";
+import { useClerk } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { CloudUpload, ChevronDown, User, Menu, X } from "lucide-react";
@@ -141,22 +141,8 @@ export default function Navbar({ user }: NavbarProps) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex gap-4 items-center">
-            {/* Show these buttons when user is signed out */}
-            <SignedOut>
-              <Link href="/sign-in">
-                <Button variant="flat" color="primary">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/sign-up">
-                <Button variant="solid" color="primary">
-                  Sign Up
-                </Button>
-              </Link>
-            </SignedOut>
-
-            {/* Show these when user is signed in */}
-            <SignedIn>
+            {user ? (
+              /* Show these when user is signed in */
               <div className="flex items-center gap-4">
                 {!isOnDashboard && (
                   <Link href="/dashboard">
@@ -213,12 +199,26 @@ export default function Navbar({ user }: NavbarProps) {
                   </DropdownMenu>
                 </Dropdown>
               </div>
-            </SignedIn>
+            ) : (
+              /* Show these buttons when user is signed out */
+              <div className="flex gap-4 items-center">
+                <Link href="/sign-in">
+                  <Button variant="flat" color="primary">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button variant="solid" color="primary">
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
-            <SignedIn>
+            {user && (
               <Avatar
                 name={userDetails.initials}
                 size="sm"
@@ -226,7 +226,7 @@ export default function Navbar({ user }: NavbarProps) {
                 className="h-8 w-8 flex-shrink-0"
                 fallback={<User className="h-4 w-4" />}
               />
-            </SignedIn>
+            )}
             <button
               className="z-50 p-2"
               onClick={toggleMobileMenu}
@@ -257,30 +257,7 @@ export default function Navbar({ user }: NavbarProps) {
               isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
             } md:hidden`}
           >
-            <SignedOut>
-              <div className="flex flex-col gap-4 items-center">
-                <Link
-                  href="/sign-in"
-                  className="w-full"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Button variant="flat" color="primary" className="w-full">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link
-                  href="/sign-up"
-                  className="w-full"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Button variant="solid" color="primary" className="w-full">
-                    Sign Up
-                  </Button>
-                </Link>
-              </div>
-            </SignedOut>
-
-            <SignedIn>
+            {user ? (
               <div className="flex flex-col gap-6">
                 {/* User info */}
                 <div className="flex items-center gap-3 py-4 border-b border-default-200">
@@ -328,7 +305,28 @@ export default function Navbar({ user }: NavbarProps) {
                   </button>
                 </div>
               </div>
-            </SignedIn>
+            ) : (
+              <div className="flex flex-col gap-4 items-center">
+                <Link
+                  href="/sign-in"
+                  className="w-full"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button variant="flat" color="primary" className="w-full">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="w-full"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button variant="solid" color="primary" className="w-full">
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

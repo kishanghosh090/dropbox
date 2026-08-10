@@ -23,7 +23,7 @@ import { signUpSchema } from "@/schemas/signUpSchema";
 
 export default function SignUpForm() {
   const router = useRouter();
-  const { signUp, isLoaded, setActive } = useSignUp();
+  const { signUp } = useSignUp();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
@@ -47,26 +47,42 @@ export default function SignUpForm() {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
-    if (!isLoaded) return;
+  const getErrorMessage = (
+    error: any,
+    fallback: string
+  ): string => {
+    return (
+      error?.errors?.[0]?.message ||
+      error?.message ||
+      fallback
+    );
+  };
 
+  const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     setIsSubmitting(true);
     setAuthError(null);
 
     try {
-      await signUp.create({
+      const result = await signUp.create({
         emailAddress: data.email,
         password: data.password,
       });
 
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      if (result.error) {
+        setAuthError(getErrorMessage(result.error, "Sign-up failed. Please try again."));
+        return;
+      }
+
+      const sendResult = await signUp.verifications.sendEmailCode();
+      if (sendResult.error) {
+        setAuthError(getErrorMessage(sendResult.error, "Failed to send verification code. Please try again."));
+        return;
+      }
+
       setVerifying(true);
     } catch (error: any) {
       console.error("Sign-up error:", error);
-      setAuthError(
-        error.errors?.[0]?.message ||
-          "An error occurred during sign-up. Please try again."
-      );
+      setAuthError(getErrorMessage(error, "An error occurred during sign-up. Please try again."));
     } finally {
       setIsSubmitting(false);
     }
@@ -76,31 +92,36 @@ export default function SignUpForm() {
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
-    if (!isLoaded || !signUp) return;
 
     setIsSubmitting(true);
     setVerificationError(null);
 
     try {
-      const result = await signUp.attemptEmailAddressVerification({
+      const result = await signUp.verifications.verifyEmailCode({
         code: verificationCode,
       });
 
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
+      if (result.error) {
+        setVerificationError(getErrorMessage(result.error, "Verification failed. Please try again."));
+        return;
+      }
+
+      if (signUp.status === "complete") {
+        const finalizeResult = await signUp.finalize();
+        if (finalizeResult.error) {
+          setVerificationError(getErrorMessage(finalizeResult.error, "Could not complete sign-up. Please try again."));
+          return;
+        }
         router.push("/dashboard");
       } else {
-        console.error("Verification incomplete:", result);
+        console.error("Verification incomplete:", signUp.status);
         setVerificationError(
           "Verification could not be completed. Please try again."
         );
       }
     } catch (error: any) {
       console.error("Verification error:", error);
-      setVerificationError(
-        error.errors?.[0]?.message ||
-          "An error occurred during verification. Please try again."
-      );
+      setVerificationError(getErrorMessage(error, "An error occurred during verification. Please try again."));
     } finally {
       setIsSubmitting(false);
     }
@@ -163,9 +184,7 @@ export default function SignUpForm() {
               <button
                 onClick={async () => {
                   if (signUp) {
-                    await signUp.prepareEmailAddressVerification({
-                      strategy: "email_code",
-                    });
+                    await signUp.verifications.sendEmailCode();
                   }
                 }}
                 className="text-primary hover:underline font-medium"

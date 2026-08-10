@@ -16,7 +16,7 @@ import { signInSchema } from "@/schemas/signInSchema";
 
 export default function SignInForm() {
   const router = useRouter();
-  const { signIn, isLoaded, setActive } = useSignIn();
+  const { signIn } = useSignIn();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -33,9 +33,18 @@ export default function SignInForm() {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof signInSchema>) => {
-    if (!isLoaded) return;
+  const getErrorMessage = (
+    error: any,
+    fallback: string
+  ): string => {
+    return (
+      error?.errors?.[0]?.message ||
+      error?.message ||
+      fallback
+    );
+  };
 
+  const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     setIsSubmitting(true);
     setAuthError(null);
 
@@ -45,19 +54,25 @@ export default function SignInForm() {
         password: data.password,
       });
 
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
+      if (result.error) {
+        setAuthError(getErrorMessage(result.error, "Sign-in failed. Please try again."));
+        return;
+      }
+
+      if (signIn.status === "complete") {
+        const finalizeResult = await signIn.finalize();
+        if (finalizeResult.error) {
+          setAuthError(getErrorMessage(finalizeResult.error, "Could not complete sign-in. Please try again."));
+          return;
+        }
         router.push("/dashboard");
       } else {
-        console.error("Sign-in incomplete:", result);
+        console.error("Sign-in incomplete:", signIn.status);
         setAuthError("Sign-in could not be completed. Please try again.");
       }
     } catch (error: any) {
       console.error("Sign-in error:", error);
-      setAuthError(
-        error.errors?.[0]?.message ||
-          "An error occurred during sign-in. Please try again."
-      );
+      setAuthError(getErrorMessage(error, "An error occurred during sign-in. Please try again."));
     } finally {
       setIsSubmitting(false);
     }
