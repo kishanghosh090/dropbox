@@ -5,10 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import Link from "next/link"; 
+import Link from "next/link";
 import { z } from "zod";
-import { Button, Input, Card, CardHeader, CardFooter } from "@heroui/react";
-
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Card, CardBody, CardHeader, CardFooter } from "@heroui/card";
+import { Divider } from "@heroui/divider";
 import {
   Mail,
   Lock,
@@ -27,7 +29,7 @@ export default function SignUpForm() {
   const [verifying, setVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [verificationError, setVerificationError] = useState<string | null>(
-    null,
+    null
   );
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,7 +43,7 @@ export default function SignUpForm() {
     defaultValues: {
       email: "",
       password: "",
-      passwordConformation: "",
+      passwordConfirmation: "",
     },
   });
 
@@ -63,7 +65,7 @@ export default function SignUpForm() {
       console.error("Sign-up error:", error);
       setAuthError(
         error.errors?.[0]?.message ||
-          "An error occurred during sign-up. Please try again.",
+          "An error occurred during sign-up. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -71,7 +73,7 @@ export default function SignUpForm() {
   };
 
   const handleVerificationSubmit = async (
-    e: React.FormEvent<HTMLFormElement>,
+    e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
     if (!isLoaded || !signUp) return;
@@ -90,14 +92,14 @@ export default function SignUpForm() {
       } else {
         console.error("Verification incomplete:", result);
         setVerificationError(
-          "Verification could not be completed. Please try again.",
+          "Verification could not be completed. Please try again."
         );
       }
     } catch (error: any) {
       console.error("Verification error:", error);
       setVerificationError(
         error.errors?.[0]?.message ||
-          "An error occurred during verification. Please try again.",
+          "An error occurred during verification. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -116,7 +118,9 @@ export default function SignUpForm() {
           </p>
         </CardHeader>
 
-        <Card className="py-6">
+        <Divider />
+
+        <CardBody className="py-6">
           {verificationError && (
             <div className="bg-danger-50 text-danger-700 p-4 rounded-lg mb-6 flex items-center gap-2">
               <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -143,7 +147,12 @@ export default function SignUpForm() {
               />
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              color="primary"
+              className="w-full"
+              isLoading={isSubmitting}
+            >
               {isSubmitting ? "Verifying..." : "Verify Email"}
             </Button>
           </form>
@@ -165,7 +174,7 @@ export default function SignUpForm() {
               </button>
             </p>
           </div>
-        </Card>
+        </CardBody>
       </Card>
     );
   }
@@ -181,7 +190,9 @@ export default function SignUpForm() {
         </p>
       </CardHeader>
 
-      <div className="py-6">
+      <Divider />
+
+      <CardBody className="py-6">
         {authError && (
           <div className="bg-danger-50 text-danger-700 p-4 rounded-lg mb-6 flex items-center gap-2">
             <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -201,6 +212,9 @@ export default function SignUpForm() {
               id="email"
               type="email"
               placeholder="your.email@example.com"
+              startContent={<Mail className="h-4 w-4 text-default-500" />}
+              isInvalid={!!errors.email}
+              errorMessage={errors.email?.message}
               {...register("email")}
               className="w-full"
             />
@@ -217,6 +231,24 @@ export default function SignUpForm() {
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
+              startContent={<Lock className="h-4 w-4 text-default-500" />}
+              endContent={
+                <Button
+                  isIconOnly
+                  variant="light"
+                  size="sm"
+                  onClick={() => setShowPassword(!showPassword)}
+                  type="button"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-default-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-default-500" />
+                  )}
+                </Button>
+              }
+              isInvalid={!!errors.password}
+              errorMessage={errors.password?.message}
               {...register("password")}
               className="w-full"
             />
@@ -233,7 +265,25 @@ export default function SignUpForm() {
               id="passwordConfirmation"
               type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
-              {...register("passwordConformation")}
+              startContent={<Lock className="h-4 w-4 text-default-500" />}
+              endContent={
+                <Button
+                  isIconOnly
+                  variant="light"
+                  size="sm"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  type="button"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4 text-default-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-default-500" />
+                  )}
+                </Button>
+              }
+              isInvalid={!!errors.passwordConfirmation}
+              errorMessage={errors.passwordConfirmation?.message}
+              {...register("passwordConfirmation")}
               className="w-full"
             />
           </div>
@@ -248,11 +298,18 @@ export default function SignUpForm() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            color="primary"
+            className="w-full"
+            isLoading={isSubmitting}
+          >
             {isSubmitting ? "Creating account..." : "Create Account"}
           </Button>
         </form>
-      </div>
+      </CardBody>
+
+      <Divider />
 
       <CardFooter className="flex justify-center py-4">
         <p className="text-sm text-default-600">
