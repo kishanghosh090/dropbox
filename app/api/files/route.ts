@@ -4,9 +4,10 @@ import { auth } from "@clerk/nextjs/server";
 import { eq, and, isNull } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const { userId } = await auth();
+
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -31,10 +32,12 @@ export async function POST(request: NextRequest) {
       userFiles = await db
         .select()
         .from(files)
-        .where(and(eq(files.id, userId), isNull(files.parentId)));
+        .where(and(eq(files.userId, userId), isNull(files.parentId)));
     }
     return NextResponse.json(userFiles);
   } catch (error) {
+    console.log(error);
+    
     return NextResponse.json(
       { error: "Failed to fething files" },
       { status: 500 },

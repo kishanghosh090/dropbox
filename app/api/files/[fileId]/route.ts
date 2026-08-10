@@ -34,7 +34,7 @@ export async function PATCH(
 
     const updatedFiles = await db
       .update(files)
-      .set({ isstarred: !files.isstarred })
+      .set({ isStarred: !file.isStarred })
       .where(and(eq(files.id, fileId)))
       .returning();
     console.log(updatedFiles);

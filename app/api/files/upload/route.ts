@@ -16,6 +16,7 @@ const imageKit = new ImageKit({
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
+    console.log(userId);
 
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,11 +24,14 @@ export async function POST(request: NextRequest) {
     // parse form data
     const formData = await request.formData();
 
+    console.log(formData);
+
     const file = formData.get("file") as File;
     const formUserId = formData.get("userId") as string;
     const parentId = (formData.get("parentId") as string) || null;
+    console.log(formUserId == userId);
 
-    if (formUserId !== userId) {
+    if (formUserId != userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -54,13 +58,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!parentId) {
-      return NextResponse.json(
-        { error: "Parent folder not found" },
-        { status: 401 },
-      );
-    }
-    if (!file.type.startsWith("image/*") && file.type !== "application/pdf") {
+    // if (!parentId) {
+    //   return NextResponse.json(
+    //     { error: "Parent folder not found" },
+    //     { status: 401 },
+    //   );
+    // }
+    if (!file.type.startsWith("image") && file.type !== "application/pdf") {
       return NextResponse.json({ error: "unsupported file!" }, { status: 400 });
     }
 

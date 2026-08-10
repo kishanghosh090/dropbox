@@ -24,7 +24,7 @@ export const files = pgTable("files", {
   parentId: uuid("parent_id"), // parent folder id (null for root item)
 
   isFolder: boolean("is_folder").default(false).notNull(),
-  isstarred: boolean("is_starred").default(false).notNull(),
+  isStarred: boolean("is_starred").default(false).notNull(),
   isTrash: boolean("is_trash").default(false).notNull(),
 
   // timestamps
@@ -42,5 +42,5 @@ export const fileReplations = relations(files, ({ one, many }) => ({
 
 //Type definition
 
-export const File = typeof files.$inferSelect;
-export const NewFile = typeof files.$inferInsert;
+export type File = typeof files.$inferSelect;
+export type NewFile = typeof files.$inferInsert;
