@@ -20,14 +20,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" className="dark">
+    <html lang="en" className="dark" data-theme="dark" style={{ colorScheme: "dark" }}>
+      <ClerkProvider>
         <body
           className={`${inter.variable} antialiased bg-background text-foreground`}
         >
           <Providers>{children}</Providers>
         </body>
-      </html>
-    </ClerkProvider>
+      </ClerkProvider>
+    </html>
   );
 }
