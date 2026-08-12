@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (parentId) {
-      const [parentFolder] = await db
+      const parentFolder = await db
         .select()
         .from(files)
         .where(
@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
             // eq(files.isFolder, true),
           ),
         );
+      console.log(parentFolder);
 
       if (!parentFolder) {
         return NextResponse.json(
