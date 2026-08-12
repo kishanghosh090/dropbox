@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { CloudUpload, LayoutGrid, Star, Trash2 } from "lucide-react";
+import { CloudUpload, LayoutGrid, Star, Trash2, Code2 } from "lucide-react";
 import { motion } from "framer-motion";
 import StorageIndicator from "@/components/dashboard/StorageIndicator";
 import UserMenu from "@/components/dashboard/UserMenu";
 import type { FileTab } from "@/types/dashboard";
 
+export type DashboardView = FileTab | "developers";
+
 interface SidebarProps {
-  activeView: FileTab;
-  onViewChange: (view: FileTab) => void;
+  activeView: DashboardView;
+  onViewChange: (view: DashboardView) => void;
   starredCount: number;
   trashCount: number;
   usedBytes: number;
@@ -27,11 +29,12 @@ const navItems: Array<{
 ];
 
 const secondaryItems: Array<{
-  key: FileTab;
+  key: DashboardView;
   label: string;
   icon: typeof LayoutGrid;
 }> = [
   { key: "trash", label: "Trash", icon: Trash2 },
+  { key: "developers", label: "Developers", icon: Code2 },
 ];
 
 export default function Sidebar({

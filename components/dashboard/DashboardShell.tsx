@@ -3,14 +3,13 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { motion, MotionConfig } from "framer-motion";
-import Sidebar from "@/components/dashboard/Sidebar";
+import Sidebar, { type DashboardView } from "@/components/dashboard/Sidebar";
 import Topbar from "@/components/dashboard/Topbar";
-import type { FileTab } from "@/types/dashboard";
 
 interface DashboardShellProps {
   children: (props: {
-    activeView: FileTab;
-    setActiveView: (view: FileTab) => void;
+    activeView: DashboardView;
+    setActiveView: (view: DashboardView) => void;
   }) => ReactNode;
   starredCount: number;
   trashCount: number;
@@ -29,10 +28,10 @@ export default function DashboardShell({
   subtitle,
   onUploadClick,
 }: DashboardShellProps) {
-  const [activeView, setActiveView] = useState<FileTab>("all");
+  const [activeView, setActiveView] = useState<DashboardView>("all");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  const handleViewChange = (view: FileTab) => {
+  const handleViewChange = (view: DashboardView) => {
     setActiveView(view);
     setIsMobileSidebarOpen(false);
   };

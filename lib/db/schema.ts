@@ -35,6 +35,7 @@ export const files = pgTable("files", {
 
 export const customApis = pgTable("custom_api", {
   id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull(),
   name: varchar("name").notNull(),
   apiKey: uuid("api_key").notNull(),
   expiredAt: timestamp("expried_at"),

@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
-import { customApis, NewCustomApi } from "@/lib/db/schema";
+import { customApis } from "@/lib/db/schema";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const dbData = await db
       .delete(customApis)
-      .where(eq(customApis.id, apiKeyId))
+      .where(and(eq(customApis.id, apiKeyId), eq(customApis.userId, userId)))
       .returning();
     return NextResponse.json({
       message: "API key deleted successfully",

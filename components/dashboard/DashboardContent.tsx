@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
 import FilesView from "@/components/dashboard/FilesView";
+import DeveloperView from "@/components/dashboard/DeveloperView";
 import UploadModal from "@/components/dashboard/UploadModal";
 import UserProfile from "@/components/UserProfile";
 
@@ -54,6 +55,8 @@ export default function DashboardContent({
           <div className="space-y-8">
             {showProfile ? (
               <UserProfile />
+            ) : activeView === "developers" ? (
+              <DeveloperView userId={userId} />
             ) : (
               <FilesView
                 key={`${activeView}-${refreshTrigger}`}

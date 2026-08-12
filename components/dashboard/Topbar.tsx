@@ -2,7 +2,7 @@
 
 import { Search, Menu, Plus } from "lucide-react";
 import { useState } from "react";
-import type { FileTab } from "@/types/dashboard";
+import type { DashboardView } from "@/components/dashboard/Sidebar";
 
 interface TopbarProps {
   title: string;
@@ -10,13 +10,17 @@ interface TopbarProps {
   onMenuClick: () => void;
   onSearchChange?: (query: string) => void;
   onUploadClick: () => void;
-  activeView: FileTab;
+  activeView: DashboardView;
 }
 
-const viewTitles: Record<FileTab, { title: string; subtitle: string }> = {
+const viewTitles: Record<DashboardView, { title: string; subtitle: string }> = {
   all: { title: "Your Files", subtitle: "Private workspace" },
   starred: { title: "Starred", subtitle: "Files you've marked for quick access." },
   trash: { title: "Trash", subtitle: "Deleted files are kept here for recovery." },
+  developers: {
+    title: "Developers",
+    subtitle: "API keys to embed your media store.",
+  },
 };
 
 export default function Topbar({

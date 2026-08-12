@@ -1,36 +1,44 @@
 import { db } from "@/lib/db";
-import { customApis, NewCustomApi } from "@/lib/db/schema";
+import { customApis } from "@/lib/db/schema";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
-export async function GET(props: { params: Promise<{ apiKeyId: string }> }) {
+export async function GET(
+  _request: NextRequest,
+  props: { params: Promise<{ apiKey: string }> },
+) {
   try {
     const { userId } = await auth();
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { apiKeyId } = await props.params;
-    if (!apiKeyId) {
+
+    const { apiKey } = await props.params;
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "API key must be provided" },
+        { error: "API key id must be provided" },
         { status: 400 },
       );
     }
+
     const [customApiData] = await db
       .select()
       .from(customApis)
-      .where(eq(customApis.id, apiKeyId))
+      .where(and(eq(customApis.id, apiKey), eq(customApis.userId, userId)))
       .limit(1);
 
     if (!customApiData) {
-      return NextResponse.json({ error: "API id not found" }, { status: 400 });
+      return NextResponse.json(
+        { error: "API key not found" },
+        { status: 404 },
+      );
     }
     return NextResponse.json({ data: customApiData });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to create API" },
+      { error: "Failed to fetch API key" },
       { status: 500 },
     );
   }

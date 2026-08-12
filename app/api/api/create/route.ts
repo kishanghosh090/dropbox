@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const data: NewCustomApi = {
+      userId: userId,
       name: name,
       apiKey: uuidv4(),
     };
