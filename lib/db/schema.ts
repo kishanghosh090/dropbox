@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 import { relations, Relations } from "drizzle-orm/_relations";
@@ -32,6 +33,15 @@ export const files = pgTable("files", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const customApis = pgTable("custom_api", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name").notNull(),
+  apiKey: uuid("api_key").notNull(),
+  expiredAt: timestamp("expried_at"),
+  // timestamps
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 export const fileReplations = relations(files, ({ one, many }) => ({
   children: many(files),
   parent: one(files, {
@@ -44,3 +54,5 @@ export const fileReplations = relations(files, ({ one, many }) => ({
 
 export type File = typeof files.$inferSelect;
 export type NewFile = typeof files.$inferInsert;
+export type CustomApi = typeof customApis.$inferSelect;
+export type NewCustomApi = typeof customApis.$inferInsert;
