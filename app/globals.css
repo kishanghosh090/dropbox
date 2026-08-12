@@ -39,6 +39,64 @@ html {
   animation: glow-move 12s ease-in-out infinite;
 }
 
+/* ============ Dashboard Design Tokens ============ */
+
+:root {
+  --dash-bg: #0a0a0a;
+  --dash-surface: #0d0d0f;
+  --dash-surface-hover: rgba(255, 255, 255, 0.03);
+  --dash-border: rgba(255, 255, 255, 0.06);
+  --dash-border-strong: rgba(255, 255, 255, 0.1);
+  --dash-foreground: #ffffff;
+  --dash-muted: rgba(255, 255, 255, 0.45);
+  --dash-muted-strong: rgba(255, 255, 255, 0.65);
+  --dash-accent: #f97316;
+  --dash-accent-hover: #fb923c;
+  --dash-accent-soft: rgba(249, 115, 22, 0.1);
+  --dash-danger: #f87171;
+  --dash-success: #34d399;
+}
+
+/* Dashboard scrollbar */
+.dash-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dash-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dash-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+
+.dash-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.dash-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -46,7 +104,8 @@ html {
   }
 
   .animate-float,
-  .animate-glow {
+  .animate-glow,
+  .dash-skeleton {
     animation: none;
   }
 

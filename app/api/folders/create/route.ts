@@ -13,6 +13,8 @@ export async function POST(request: NextRequest) {
     }
     const body = await request.json();
     const { name, userId: bodyUserId, parentId = null } = body;
+    console.log(parentId);
+
     if (bodyUserId != userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -65,7 +67,32 @@ export async function POST(request: NextRequest) {
         folder: newFolder,
       });
     }
+
+    const folderData = {
+      id: uuidv4(),
+      name: name.trim(),
+      path: `/folders/${userId}/${uuidv4()}`,
+      size: 0,
+      type: "folder",
+      fileUrl: "",
+      thumbnailUrl: null,
+      userId,
+      parentId: null,
+      isFolder: true,
+      isStarred: false,
+      isTrash: false,
+    };
+    const [newFolder] = await db.insert(files).values(folderData).returning();
+    console.log(newFolder);
+
+    return NextResponse.json({
+      success: true,
+      message: "folder created successfully",
+      folder: newFolder,
+    });
   } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       { error: "Failed to generate auth parameters" },
       { status: 500 },

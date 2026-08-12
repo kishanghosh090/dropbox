@@ -16,7 +16,6 @@ const imageKit = new ImageKit({
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
-    console.log(userId);
 
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -29,6 +28,8 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
     const formUserId = formData.get("userId") as string;
     const parentId = (formData.get("parentId") as string) || null;
+    console.log(parentId);
+
     console.log(formUserId == userId);
 
     if (formUserId != userId) {
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: "no file provided" }, { status: 401 });
     }
+
     if (parentId) {
       const [parentFolder] = await db
         .select()
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
           and(
             eq(files.userId, formUserId),
             eq(files.parentId, parentId),
-            eq(files.isFolder, true),
+            // eq(files.isFolder, true),
           ),
         );
 
@@ -58,12 +60,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // if (!parentId) {
-    //   return NextResponse.json(
-    //     { error: "Parent folder not found" },
-    //     { status: 401 },
-    //   );
-    // }
     if (!file.type.startsWith("image") && file.type !== "application/pdf") {
       return NextResponse.json({ error: "unsupported file!" }, { status: 400 });
     }
@@ -93,7 +89,7 @@ export async function POST(request: NextRequest) {
       fileUrl: uploadResponse.url,
       thumbnailUrl: uploadResponse.thumbnailUrl,
       userId: userId,
-      parentId: null,
+      parentId: parentId,
       isFolder: false,
       isStarred: false,
       isTrash: false,
