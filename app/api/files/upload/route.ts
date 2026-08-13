@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { files } from "@/lib/db/schema";
+import { CustomApi, customApis, files, NewCustomApi } from "@/lib/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import ImageKit from "imagekit";
@@ -15,15 +15,28 @@ const imageKit = new ImageKit({
 
 export async function POST(request: NextRequest) {
   try {
+    const formData = await request.formData();
+    // parse form data
+    const customApiKey = (formData.get("apiKey") as string) || null;
+
     const { userId } = await auth();
 
-    if (!userId)
+    if (!userId && !customApiKey)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    // parse form data
-    const formData = await request.formData();
-
-    console.log(formData);
+    let dataFromCustomApiKey: CustomApi | null = null;
+    if (customApiKey) {
+      [dataFromCustomApiKey] = await db
+        .select()
+        .from(customApis)
+        .where(eq(customApis.apiKey, customApiKey))
+        .limit(1);
+      if (!dataFromCustomApiKey) {
+        return NextResponse.json(
+          { error: "API key not valid" },
+          { status: 400 },
+        );
+      }
+    }
 
     const file = formData.get("file") as File;
     const formUserId = formData.get("userId") as string;
@@ -69,8 +82,8 @@ export async function POST(request: NextRequest) {
     const fileBuffer = Buffer.from(buffer);
 
     const folderPath = parentId
-      ? `/dropbox/${userId}/folder/${parentId}`
-      : `/dropbox/${userId}`;
+      ? `/dropbox/${userId ? userId : uuidv4()}/folder/${parentId}`
+      : `/dropbox/${userId ? userId : uuidv4()}`;
     const originalFileName = file.name;
     const fileExtension = originalFileName.split(".").pop() || "";
     //validation for not storing exe, php
@@ -89,7 +102,7 @@ export async function POST(request: NextRequest) {
       type: file.type,
       fileUrl: uploadResponse.url,
       thumbnailUrl: uploadResponse.thumbnailUrl,
-      userId: userId,
+      userId: dataFromCustomApiKey ? dataFromCustomApiKey.userId : userId,
       parentId: parentId,
       isFolder: false,
       isStarred: false,
